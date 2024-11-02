@@ -1,3 +1,4 @@
+// background.js
 function convertToMarkdown(contentArray) {
   return contentArray.map(item => {
       switch (item.type) {
@@ -5,7 +6,6 @@ function convertToMarkdown(contentArray) {
               return `# ${item.text}\n\n`;
           
           case 'heading':
-              // Create heading with appropriate number of #
               return `${'#'.repeat(item.level)} ${item.text}\n\n`;
           
           case 'paragraph':
@@ -14,8 +14,12 @@ function convertToMarkdown(contentArray) {
           case 'link':
               return `[${item.text}](${item.href})\n\n`;
           
-          case 'list':
-              return item.items.map(listItem => `- ${listItem}`).join('\n') + '\n\n';
+          case 'bulletList':
+              return item.items.map(bulletItem => {
+                  // Add two spaces of indentation for each level
+                  const indent = '  '.repeat(bulletItem.level - 1);
+                  return `${indent}- ${bulletItem.text}`
+              }).join('\n') + '\n\n';
           
           case 'code':
               return `\`\`\`${item.language}\n${item.text}\n\`\`\`\n\n`;
@@ -32,6 +36,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
   if (request.action === "processExtractedContent") {
       try {
+        
           const markdown = convertToMarkdown(request.content);
           
           // Convert to data URL instead of using Blob

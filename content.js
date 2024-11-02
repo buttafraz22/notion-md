@@ -1,5 +1,3 @@
-// content.js
-console.log('Content script loaded and running');
 function extractNotionContent() {
     const contentArray = [];
     
@@ -8,7 +6,7 @@ function extractNotionContent() {
         type: 'title',
         text: document.title
     });
-
+    
     // Extract main content
     const mainContent = document.querySelector('.notion-page-content');
     if (mainContent) {
@@ -28,9 +26,22 @@ function extractNotionContent() {
                     text: block.textContent.trim()
                 });
             }
+            // Handle bullet points
+            else if (block.classList.contains('notion-bulleted_list-block')) {
+                // Look for the notranslate div inside the bullet point
+                const bulletText = block.querySelector('.notranslate');
+                if (bulletText && bulletText.textContent.trim()) {
+                    contentArray.push({
+                        type: 'bulletList',
+                        items: [{
+                            text: bulletText.textContent.trim(),
+                            level: getListItemLevel(block)
+                        }]
+                    });
+                }
+            }
             // Handle regular text
             else if (block.classList.contains('notion-text-block')) {
-                // Check if the text block contains a notion page link
                 const pageLink = block.querySelector('.notion-page-link');
                 if (pageLink) {
                     contentArray.push({
@@ -45,14 +56,6 @@ function extractNotionContent() {
                     });
                 }
             }
-            // Handle lists
-            else if (block.classList.contains('notion-bulleted-list')) {
-                contentArray.push({
-                    type: 'list',
-                    items: Array.from(block.querySelectorAll('.notion-list-item'))
-                        .map(item => item.textContent.trim())
-                });
-            }
             // Handle code blocks
             else if (block.classList.contains('notion-code-block')) {
                 contentArray.push({
@@ -63,8 +66,21 @@ function extractNotionContent() {
             }
         });
     }
-
+    
     return contentArray;
+}
+
+
+function getListItemLevel(item) {
+    let level = 1;
+    let parent = item.parentElement;
+    while (parent) {
+        if (parent.classList.contains('notion-bulleted_list-block')) {
+            level++;
+        }
+        parent = parent.parentElement;
+    }
+    return level;
 }
 
 
@@ -76,6 +92,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     
     if (request.action === "downloadPage") {
         const extractedContent = extractNotionContent();
+        console.log('Request.content: ', extractedContent)
         
         chrome.runtime.sendMessage({
             action: "processExtractedContent",
