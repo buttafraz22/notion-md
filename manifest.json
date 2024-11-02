@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "Notion to Word Downloader",
+  "version": "1.0",
+  "description": "Download Notion pages as Markdown Pages.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "downloads",
+    "storage"
+  ],
+  "host_permissions": [
+    "https://*.notion.so/*"
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.notion.so/*"],
+      "js": ["content.js"]
+    }
+  ]
+}
