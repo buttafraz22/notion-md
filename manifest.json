@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Notion to Word Downloader",
+  "name": "NotionMD Assist",
   "version": "1.0",
   "description": "Download Notion pages as Markdown Pages.",
   "permissions": [
@@ -9,6 +9,10 @@
     "downloads",
     "storage"
   ],
+  "icons": {
+    "48": "icon-jr.png",
+    "128": "icon-enl.png"
+  },
   "host_permissions": [
     "https://*.notion.so/*"
   ],

@@ -39,7 +39,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
         
           const markdown = convertToMarkdown(request.content);
           
-          // Convert to data URL instead of using Blob
           const dataUrl = 'data:text/markdown;charset=utf-8,' + encodeURIComponent(markdown);
           
           const title = request.content[0]?.text || 'notion-export';
