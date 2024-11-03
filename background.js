@@ -1,4 +1,3 @@
-// background.js
 function convertToMarkdown(contentArray) {
   return contentArray.map(item => {
       switch (item.type) {
@@ -21,6 +20,29 @@ function convertToMarkdown(contentArray) {
                   return `${indent}- ${bulletItem.text}`
               }).join('\n') + '\n\n';
           
+          case 'numberList':
+            const counters = [];
+
+            return item.items.map(listItem => {
+                const level = listItem.level;
+                const indent = '   '.repeat(level - 1);
+                
+                
+                if (counters.length < level) {
+                    counters.push(1); 
+                } else {
+                    counters[level - 1] += 1;
+                }
+                
+                // Reset deeper levels if any
+                counters.length = level;
+
+                // Get the appropriate marker for this level
+                const marker = getLevelMarker(level, counters[level - 1]);
+                
+                return `${indent}${marker} ${listItem.text}`;
+            }).join('\n') + '\n\n';
+            
           case 'code':
               return `\`\`\`${item.language}\n${item.text}\n\`\`\`\n\n`;
           
@@ -31,6 +53,31 @@ function convertToMarkdown(contentArray) {
 }
 
 
+function toRoman(num) {
+    const romanNumerals = [
+        ['x', 10], ['ix', 9], ['v', 5], ['iv', 4], ['i', 1]
+    ];
+    let result = '';
+    for (const [letter, value] of romanNumerals) {
+        while (num >= value) {
+            result += letter;
+            num -= value;
+        }
+    }
+    return result;
+}
+
+function getLevelMarker(level, counter) {
+    if (level === 1) {
+        return `${counter}.`; // 1., 2., 3.
+    } else if (level === 2) {
+        return `${String.fromCharCode(96 + counter)}.`; // a., b., c.
+    } else if (level === 3) {
+        return `${toRoman(counter)}.`; // i., ii., iii.
+    } else {
+        return `${counter}.`;
+    }
+}
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   console.log('Message received in background:', request);
 

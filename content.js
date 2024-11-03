@@ -35,7 +35,21 @@ function extractNotionContent() {
                         type: 'bulletList',
                         items: [{
                             text: bulletText.textContent.trim(),
-                            level: getListItemLevel(block)
+                            level: getListItemLevel(block, 'notion-bulleted_list-block')
+                        }]
+                    });
+                }
+            }
+            // Handle numbered list points
+            else if (block.classList.contains('notion-numbered_list-block')) {
+                // Look for the notranslate div inside the numbered list point
+                const bulletText = block.querySelector('.notranslate');
+                if (bulletText && bulletText.textContent.trim()) {
+                    contentArray.push({
+                        type: 'numberList',
+                        items: [{
+                            text: bulletText.textContent.trim(),
+                            level: getListItemLevel(block, 'notion-numbered_list-block')
                         }]
                     });
                 }
@@ -71,11 +85,12 @@ function extractNotionContent() {
 }
 
 
-function getListItemLevel(item) {
+function getListItemLevel(item, className) {
     let level = 1;
     let parent = item.parentElement;
+    let classSearchText = className === 'notion-numbered_list-block' ? className : 'notion-bulleted_list-block';
     while (parent) {
-        if (parent.classList.contains('notion-bulleted_list-block')) {
+        if (parent.classList.contains(classSearchText)) {
             level++;
         }
         parent = parent.parentElement;
